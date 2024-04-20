@@ -42,7 +42,7 @@ def get_hurricane():
     return get_disaster_data("Hurricane")
 
 @app.get("/mudslide_data")
-def get_hurricane():
+def get_mudslide():
     return get_disaster_data("Mud/Landslide")
 
 @app.get("/tornado_data")
@@ -54,9 +54,9 @@ def get_drought():
     return get_disaster_data("Drought")
 
 @app.get("/earthquake_data")
-def get_flood():
+def get_eq():
     return get_disaster_data("Earthquake")
 
 @app.get("/snowstorm_data")
-def get_flood():
+def get_snowstorm():
     return get_snow_ice_storm()

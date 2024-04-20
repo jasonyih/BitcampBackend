@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Image from FastAPI</h1>
+    <div id="imageContainer"></div>
+
+    <script>
+        // Function to fetch and display the image
+        async function fetchAndDisplayImage() {
+            try {
+                // Make an HTTP GET request to your FastAPI endpoint
+                const response = await fetch('http://localhost:8000/TX/Flood/2018-09');
+                const imageBytes = await response.arrayBuffer();
+                
+                // Convert the fetched image bytes to a base64-encoded data URL
+                const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBytes)));
+                const imageUrl = `data:image/png;base64,${base64Image}`;
+
+                // Create an image element and set its source to the data URL
+                const imageElement = document.createElement('img');
+                imageElement.src = imageUrl;
+
+                // Append the image element to the container div
+                const imageContainer = document.getElementById('imageContainer');
+                imageContainer.appendChild(imageElement);
+            } catch (error) {
+                console.error('Error fetching image:', error);
+            }
+        }
+
+        // Call the fetchAndDisplayImage function when the page loads
+        window.onload = fetchAndDisplayImage;
+    </script>
+</body>
+</html>
