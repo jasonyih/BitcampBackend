@@ -1,12 +1,8 @@
 import pandas as pd
-import matplotlib
-matplotlib.use('AGG')
-import matplotlib.pyplot as plt
 from datetime import datetime
-import io
-from PIL import Image
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+import json
 
 disasters = pd.read_csv("DisasterDeclarationsSummaries.csv")
 mortgages = pd.read_csv("StateMortgagesPercent-30-89DaysLate-thru-2023-09.csv")
@@ -101,18 +97,22 @@ def get_df_based_on_date(state, begin_date):
 
 def mortgage_data_for_state(state, date):
     date_t = datetime.strptime(date, "%Y-%m")
+    begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
     end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
     data = [
-        ["Date", state]
+        ["Date", state, {'type': 'string', 'role': 'style'}]
     ]
     
     row = mortgages[mortgages['Name'] == state_codes[state]]
     for column in row.columns:
-        if column >= date and column <= end_date:
+        if column >= begin_date and column <= end_date:
             index = row[column].keys()[0]
-            data.append([column, row[column][index]])
+            if column == date:
+                data.append([column, row[column][index], 'point { size: 20; shape-type: star; }'])
+            else:
+                data.append([column, row[column][index], None])
     
-    return data
+    return json.dumps(data)
 
 def disaster_list(state, disaster):
     dis_list = {"list": []}
@@ -126,6 +126,7 @@ def disaster_list(state, disaster):
 app = FastAPI()
 
 origins = [
+     "http://localhost:5173",
     "http://localhost",
     "http://localhost:8000",
     "http://127.0.0.1:5500"
@@ -175,10 +176,6 @@ def get_snowstorm():
 def return_list(state: str, disaster: str):
     return disaster_list(state, disaster)
 
-@app.get("/{state}/{disaster}/{date}")
-def return_graph_data(state: str, disaster: str, date: str):
+@app.get("/mortgages/{state}/{date}")
+def return_graph_data(state: str, date: str):
     return mortgage_data_for_state(state, date)
-    # df = get_df_based_on_date(state, date)
-    # img_bytes = make_graph(df)
-
-    # return Response(content=img_bytes.getvalue(), media_type="image/png")
