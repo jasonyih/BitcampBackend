@@ -8,6 +8,8 @@ from scipy.stats import kruskal
 disasters = pd.read_csv("DisasterDeclarationsSummaries.csv")
 mortgages = pd.read_csv("StateMortgagesPercent-30-89DaysLate-thru-2023-09.csv")
 
+
+
 state_codes = {
     "AL": "Alabama",
     "AK": "Alaska",
@@ -142,6 +144,10 @@ def kruskal_wallis(state, date):
     results = kruskal(data_before, data_after)
     return results
 
+fires = get_disaster_data("Fire")
+floods = get_disaster_data("Flood")
+hurricanes = get_disaster_data("Hurricane")
+
 app = FastAPI()
 
 origins = [
@@ -161,15 +167,15 @@ app.add_middleware(
 
 @app.get("/flood_data")
 def get_flood():
-    return get_disaster_data("Flood")
+    return floods
 
 @app.get("/fire_data")
 def get_fire():
-    return get_disaster_data("Fire")
+    return fires
 
 @app.get("/hurricane_data")
 def get_hurricane():
-    return get_disaster_data("Hurricane")
+    return hurricanes
 
 @app.get("/mudslide_data")
 def get_mudslide():
@@ -193,7 +199,7 @@ def get_snowstorm():
 
 @app.get("/combined_data")
 def get_combined():
-    return {"Flood": get_disaster_data("Flood"), "Fire": get_disaster_data("Fire"), "Hurricane": get_disaster_data("Hurricane")}
+    return {"Flood": floods, "Fire": fires, "Hurricane": hurricanes}
 
 @app.get("/{state}/{disaster}")
 def return_list(state: str, disaster: str):
