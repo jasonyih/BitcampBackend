@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 import json
+from scipy.stats import kruskal
 
 disasters = pd.read_csv("DisasterDeclarationsSummaries.csv")
 mortgages = pd.read_csv("StateMortgagesPercent-30-89DaysLate-thru-2023-09.csv")
@@ -123,6 +124,24 @@ def disaster_list(state, disaster):
     
     return dis_list
 
+def kruskal_wallis(state, date):
+    date_t = datetime.strptime(date, "%Y-%m")
+    begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
+    end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
+    row = mortgages[mortgages['Name'] == state_codes[state]]
+    data_before = []
+    data_after = []
+    for column in row.columns:
+        if column >= begin_date and column <= date:
+            index = row[column].keys()[0]
+            data_before.append(row[column][index])
+        elif column > date and column <= end_date:
+            index = row[column].keys()[0]
+            data_after.append(row[column][index])
+
+    results = kruskal(data_before, data_after)
+    return results
+
 app = FastAPI()
 
 origins = [
@@ -172,6 +191,10 @@ def get_eq():
 def get_snowstorm():
     return get_snow_ice_storm()
 
+@app.get("/combined_data")
+def get_combined():
+    return {"Flood": get_disaster_data("Flood"), "Fire": get_disaster_data("Fire"), "Hurricane": get_disaster_data("Hurricane")}
+
 @app.get("/{state}/{disaster}")
 def return_list(state: str, disaster: str):
     return disaster_list(state, disaster)
@@ -179,3 +202,7 @@ def return_list(state: str, disaster: str):
 @app.get("/mortgages/{state}/{date}")
 def return_graph_data(state: str, date: str):
     return mortgage_data_for_state(state, date)
+
+@app.get("/kruskal/{state}/{date}")
+def return_kruskal_results(state: str, date: str):
+    return kruskal_wallis(state, date)
