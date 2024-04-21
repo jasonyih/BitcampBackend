@@ -7,8 +7,7 @@ from scipy.stats import kruskal
 
 disasters = pd.read_csv("DisasterDeclarationsSummaries.csv")
 mortgages = pd.read_csv("StateMortgagesPercent-30-89DaysLate-thru-2023-09.csv")
-
-
+fargo = pd.read_csv("fargo.csv")
 
 state_codes = {
     "AL": "Alabama",
@@ -117,13 +116,17 @@ def mortgage_data_for_state(state, date):
     
     return json.dumps(data)
 
-def credit_data_for_state(state, date):
-    date_t = datetime.strptime(date, "%Y-%m")
-    begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
-    end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
-    data = [
-        ["Date", state_codes[state]]
-    ]
+# def credit_data_for_state(state, date):
+#     date_t = datetime.strptime(date, "%Y-%m")
+#     begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
+#     end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
+#     data = [
+#         ["Date", state_codes[state]]
+#     ]
+
+#     for index, row in fargo.iterrows():
+#         if not pd.isna(row['Foreclosure_date']):
+
 
 def disaster_list(state, disaster):
     dis_list = {"list": []}
