@@ -128,7 +128,7 @@ def credit_data_for_state(state, date):
 def disaster_list(state, disaster):
     dis_list = {"list": []}
     for index, row in disasters.iterrows():
-        if row['incidentBeginDate'] >= "2015" and row['incidentType'] == disaster and row['state'] == state:
+        if row['incidentBeginDate'] >= "2008" and row['incidentType'] == disaster and row['state'] == state:
             date = row['incidentBeginDate']
             dis_list["list"].append({"state": row['state'], "incidentType": row['incidentType'], "date": date[:date.index("T")]})
     
@@ -148,7 +148,6 @@ def kruskal_wallis(state, date):
         elif column > date and column <= end_date:
             index = row[column].keys()[0]
             data_after.append(row[column][index])
-
     results = kruskal(data_before, data_after)
     return results
 
