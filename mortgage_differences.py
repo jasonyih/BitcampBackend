@@ -103,7 +103,7 @@ def mortgage_data_for_state(state, date):
     begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
     end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
     data = [
-        ["Date", state, {'type': 'string', 'role': 'style'}]
+        ["Date", state_codes[state], {'type': 'string', 'role': 'style'}]
     ]
     
     row = mortgages[mortgages['Name'] == state_codes[state]]
@@ -117,10 +117,18 @@ def mortgage_data_for_state(state, date):
     
     return json.dumps(data)
 
+def credit_data_for_state(state, date):
+    date_t = datetime.strptime(date, "%Y-%m")
+    begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
+    end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
+    data = [
+        ["Date", state_codes[state]]
+    ]
+
 def disaster_list(state, disaster):
     dis_list = {"list": []}
     for index, row in disasters.iterrows():
-        if row['incidentBeginDate'] >= "2010" and row['incidentType'] == disaster and row['state'] == state:
+        if row['incidentBeginDate'] >= "2015" and row['incidentType'] == disaster and row['state'] == state:
             date = row['incidentBeginDate']
             dis_list["list"].append({"state": row['state'], "incidentType": row['incidentType'], "date": date[:date.index("T")]})
     
