@@ -7,7 +7,7 @@ from scipy.stats import kruskal
 
 disasters = pd.read_csv("DisasterDeclarationsSummaries.csv")
 mortgages = pd.read_csv("StateMortgagesPercent-30-89DaysLate-thru-2023-09.csv")
-fargo = pd.read_csv("fargo.csv")
+atlanta = pd.read_csv("atlanta.csv")
 
 state_codes = {
     "AL": "Alabama",
@@ -116,17 +116,32 @@ def mortgage_data_for_state(state, date):
     
     return json.dumps(data)
 
-# def credit_data_for_state(state, date):
-#     date_t = datetime.strptime(date, "%Y-%m")
-#     begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
-#     end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
-#     data = [
-#         ["Date", state_codes[state]]
-#     ]
+def foreclosure_for_state(city, date):
+    date_t = datetime.strptime(date, "%Y-%m")
+    begin_date = date_t.replace(year=date_t.year - 1).strftime("%Y-%m")
+    end_date = date_t.replace(year=date_t.year + 1).strftime("%Y-%m")
+    data = []
 
-#     for index, row in fargo.iterrows():
-#         if not pd.isna(row['Foreclosure_date']):
+    dates = {}
 
+    for index, row in atlanta.iterrows():
+        if not pd.isna(row['Foreclosure_date']):
+            foreclosure_date = str(int((row['Foreclosure_date'])))
+            date_object = datetime.strptime(foreclosure_date, '%m%Y')
+            output = date_object.strftime('%Y-%m')
+            if output >= begin_date and output <= end_date:
+                if output not in dates.keys():
+                    dates[output] = 1
+                else:
+                    dates[output] += 1
+    
+    for key in dates.keys():
+        data.append([key, dates[key]])
+    
+    data = sorted(data)
+    data.insert(0, ["Date", city])
+
+    return json.dumps(data)
 
 def disaster_list(state, disaster):
     dis_list = {"list": []}
@@ -223,3 +238,7 @@ def return_graph_data(state: str, date: str):
 @app.get("/kruskal/{state}/{date}")
 def return_kruskal_results(state: str, date: str):
     return kruskal_wallis(state, date)
+
+@app.get("/foreclosures/{state}/{date}")
+def return_foreclosure(state: str, date: str):
+    return foreclosure_for_state(state, date)
