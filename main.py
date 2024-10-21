@@ -37,12 +37,30 @@ def disaster_list(state, disaster):
     # Connecting to our database
     con = sqlite3.connect("disasters.db")
     cur = con.cursor()
-    for row in cur.execute(f"select * from disasters where state = '{state}' and declarationDate > '2008/01/01' and incidentType = '{disaster}'"):
+    join_hurricanes = f"""
+        SELECT state, declarationDate, incidentType, declarationTitle, windspeed
+        FROM disasters as d LEFT OUTER JOIN hurricanes as h on (d.declarationTitle = h.name)
+        WHERE state = '{state}' AND declarationDate > '2008/01/01' AND incidentType = '{disaster}'
+        GROUP BY declarationTitle;
+    """
+    
+    #for row in cur.execute(f"select * from disasters where state = '{state}' and declarationDate > '2008/01/01' and incidentType = '{disaster}'"):
+    for row in cur.execute(join_hurricanes):
         state = row[0]
         date = row[1]
         incidentType =  row[2]
         declarationTitle = row[3]
-        dis_list["list"].append({"state": state, "incidentType": incidentType, "date": date, "incidentName": declarationTitle})
+        windspeed = row[4]
+        # result = cur.execute(f"select windspeed from hurricanes where name = '{str(declarationTitle).split()[1].title()}'")
+        # print (result)
+        # if incidentType == 'Hurricane':
+        #     print(str(declarationTitle).split()[1].title())
+        #     windspeed = cur.execute(f"select windspeed from hurricanes where name = '{str(declarationTitle).split()[1].title()}';")
+        #     print(windspeed)
+        #     dis_list["list"].append({"state": state, "incidentType": incidentType, "date": date, "incidentName": declarationTitle, 'windspeed': windspeed})
+
+        # else:
+        dis_list["list"].append({"state": state, "incidentType": incidentType, "date": date, "incidentName": declarationTitle, 'windspeed': windspeed })
     
     return dis_list
 
